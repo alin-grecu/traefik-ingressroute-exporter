@@ -1,0 +1,4 @@
+apiVersion: v2
+name: traefik-ingressroute-exporter
+version: 0.0.1
+description: Creates the traefik-ingressroute-exporter service

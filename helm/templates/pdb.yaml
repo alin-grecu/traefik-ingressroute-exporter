@@ -1,0 +1,12 @@
+{{- if .Values.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "release.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels: {{- include "release.labels" . | nindent 6 }}
+  maxUnavailable: 50%
+{{- end }}

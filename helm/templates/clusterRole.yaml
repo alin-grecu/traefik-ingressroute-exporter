@@ -1,0 +1,21 @@
+{{- if .Values.enabled }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ .Release.Name }}-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - namespaces
+  verbs:
+  - get
+  - list
+- apiGroups:
+  - traefik.containo.us
+  resources:
+  - ingressroutes
+  verbs:
+  - get
+  - list
+{{- end }}

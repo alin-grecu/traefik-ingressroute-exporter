@@ -1,0 +1,59 @@
+{{- if .Values.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "release.labels" . | nindent 4 }}
+spec:
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels: {{- include "release.labels" . | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- include "release.labels" . | nindent 8 }}
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /metrics
+        prometheus.io/port: {{ .Values.deployment.port }}
+    spec:
+      serviceAccountName: {{ .Release.Name }}
+      containers:
+      - name: service
+        image: {{ .Values.deployment.image.repository }}:{{ .Values.deployment.image.tag }}
+        imagePullPolicy: {{ .Values.deployment.image.imagePullPolicy }}
+        {{- if or (.Values.configs) (.Values.secrets)  }}
+        envFrom:
+        {{- if .Values.configs }}
+        - configMapRef:
+            name: {{ .Release.Name }}
+        {{- end }}
+        {{- if .Values.secrets }}
+        - secretRef:
+            name: {{ .Release.Name }}
+        {{- end }}
+        {{- end }}
+        resources:
+          {{- with .Values.deployment.resources }}
+          {{- toYaml . | nindent 10 }}
+          {{- end }}
+        {{- if .Values.deployment.healthChecks.enabled }}
+        readinessProbe:
+          tcpSocket:
+            port: {{ .Values.deployment.port }}
+          initialDelaySeconds: 2
+          periodSeconds: 10
+          failureThreshold: 3
+          successThreshold: 1
+        livenessProbe:
+          tcpSocket:
+            port: {{ .Values.deployment.port }}
+          initialDelaySeconds: 10
+          periodSeconds: 20
+          failureThreshold: 5
+          successThreshold: 1
+        {{- end }}
+        ports:
+        - containerPort: {{ .Values.deployment.port }}
+{{- end }}

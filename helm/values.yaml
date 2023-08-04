@@ -1,0 +1,23 @@
+# Setting this to false will cause all resources to be removed
+enabled: true
+
+# Settings for the Kubernetes Deployment
+deployment:
+  port: 8080
+  healthChecks:
+    enabled: true
+  hpa:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 5
+  image:
+    repository: "yetanother/traefik-ingressroute-exporter"
+    tag: latest
+    imagePullPolicy: "IfNotPresent"
+  resources:
+    requests:
+      cpu: 20m
+      memory: 128Mi
+    limits:
+      cpu: 100m
+      memory: 1024Mi
